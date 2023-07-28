@@ -26,11 +26,11 @@ for line in file_from:
     #plt.show()
 
     infected = []
-    patient_zero = sample(list(G.nodes()),1)
-    infected = [patient_zero[0]] #othwerwise we get a reference
+    patient_zero = sample(list(G.nodes()),1)[0]
+    infected = [patient_zero] #othwerwise we get a reference
     print("Patient zero is :", infected)
 
-    immune = [patient_zero[0]]
+    immune = [patient_zero]
     new_infected = []
 
     for d in range(days):
@@ -50,7 +50,7 @@ for line in file_from:
     print(immune)
     print(infected)
     
-    data_to_write.append([dictionary,infected,immune,days,patient_zero])
+    data_to_write.append([line,json.dumps(infected),json.dumps(immune),days,patient_zero])
 
 #writing forwared data into csv file with format of:
 #adjacency_list,infected_list,immune_list,n_steps,patient zero
