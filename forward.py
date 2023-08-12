@@ -14,9 +14,11 @@ import json
 file_from = open("Graph_created.txt",'r')
 
 data_to_write = []
+index = 0
 
 for line in file_from:
-    days = random.randint(2,10)
+    #days = random.randint(2,10)
+    days = 1
     
     dictionary = json.loads(line)
     G = nx.from_dict_of_dicts(dictionary)
@@ -49,17 +51,30 @@ for line in file_from:
         new_infected = []
     print(immune)
     print(infected)
+    index +=1
     
     data_to_write.append([line,json.dumps(infected),json.dumps(immune),days,patient_zero])
 
+print("Last index:",index)
+index_test = round(index*0.8)
 #writing forwared data into csv file with format of:
 #adjacency_list,infected_list,immune_list,n_steps,patient zero
-with open('forwarded_graph.csv', 'a', encoding='UTF8', newline='') as f:
+with open('data/raw/forwarded_graph.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
 
+    writer.writerow(["adjacency list", "infected", "immune","days","patient zero"])
     # write multiple rows
-    writer.writerows(data_to_write)
+    writer.writerows(data_to_write[0:index_test])
+
+
+with open('data/raw/forwarded_graph_test.csv', 'w', encoding='UTF8', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["adjacency list", "infected", "immune","days","patient zero"])
+
+    # write multiple rows
+    writer.writerows(data_to_write[index_test:])
 
 #closing file
 file_from.close()
+
     

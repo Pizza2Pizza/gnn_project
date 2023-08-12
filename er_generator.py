@@ -5,7 +5,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 
-for i in range(10):
+data = open("Graph_created.txt",'w+') 
+data.truncate()
+
+for i in range(100):
     n = 11  # 10 nodes
     seed = 20161  # seed random number generators for reproducibility
 
@@ -37,6 +40,8 @@ for i in range(10):
     # nx.write_adjlist(d,file,encoding='utf-8')
     # file.close()
 
-    with open("Graph_created.txt",'a') as data: 
-        data.write(json.dumps(d))
-        data.write("\n")
+    
+    data.write(json.dumps(d))
+    data.write("\n")
+
+data.close()

@@ -8,6 +8,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+import tensorflow as tf
+
 
 class GCN(torch.nn.Module):
     def __init__(self,dataset):
@@ -93,7 +95,7 @@ def test():
       test_correct = 1- test_not_acc
       return test_correct
 
-for epoch in range(10):
+for epoch in range(100):
     data = train_dataset[epoch]
     loss, h = train(data)
     if epoch % 10 == 0:
