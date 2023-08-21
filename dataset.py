@@ -19,11 +19,12 @@ import torch
 from torch_geometric.data import Dataset, download_url
 
 class MyOwnDataset(Dataset):
-    def __init__(self, root, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, root, test = False, transform=None, pre_transform=None, pre_filter=None):
         """
         root = Where the dataset should be stored. This folder is split
         into raw_dir (downloaded dataset) and processed_dir (processed data). 
         """
+        self.test = test
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
@@ -31,12 +32,18 @@ class MyOwnDataset(Dataset):
         """ If this file exists in raw_dir, the download is not triggered.
             (The download func. is not implemented here)  
         """
-        return "forwarded_graph.csv"
+        if self.test:
+            return "forwarded_graph_test.csv"
+        else:
+            return "forwarded_graph.csv"
 
     @property
     def processed_file_names(self):
         """ If these files are found in raw_dir, processing is skipped"""
-        return "forwarded_graph.pt"
+        if self.test:
+            return "forwarded_graph_test.pt"
+        else:
+            return "forwarded_graph.pt"
 
     def download(self):
         # Download to `self.raw_dir`.
@@ -50,21 +57,28 @@ class MyOwnDataset(Dataset):
             node_feats = self._get_node_features(row_obj)
 
             # Get adjacency info
-            edge_index,_n = self._get_adjacency_info(row_obj)
+            edge_index,num_nodes = self._get_adjacency_info(row_obj)
+            self.num_nodes = num_nodes
             # Get labels info
             label = self._get_labels(row_obj)
 
-            edge_indices = torch.tensor(edge_index)
-            edge_indices = edge_indices.t().to(torch.long).view(2, -1)
+            #edge_indices = torch.tensor(edge_index)
+            #edge_indices = edge_indices.t().to(torch.long).view(2, -1)
+            edge_indices = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
 
             # Create data object
             data = Data(x=node_feats, 
                         edge_index=edge_indices,
                         y=label,
-                        days = row["days"]
+                        days = row["days"],
+                        num_nodes = num_nodes
                         ) 
-            
-            torch.save(data, 
+            if self.test:
+                torch.save(data, 
+                    os.path.join(self.processed_dir, 
+                                 f'data_test_{index}.pt'))
+            else:            
+                torch.save(data, 
                 os.path.join(self.processed_dir, f'data_{index}.pt'))
 
     def _get_adjacency_info(self, row):
@@ -82,8 +96,11 @@ class MyOwnDataset(Dataset):
     
 
     def _get_labels(self, row):
-        label = row["patient_zero"]
-        return torch.tensor(label, dtype=torch.int64)
+        label = int(row["patient_zero"])
+        _var2,num_nodes = self._get_adjacency_info(row)
+        list_labels = [[0,1]]*num_nodes
+        list_labels[label] = [1,0]
+        return torch.tensor(list_labels, dtype=torch.int64)
 
     def _get_node_features(self, row):
         """ 
@@ -91,32 +108,39 @@ class MyOwnDataset(Dataset):
         [Number of Nodes, Node Feature size]
         """
         all_node_feats = []
-        infected = json.loads(row["infected"])
-        immune = json.loads(row["immune"])
+        infected = [int(c) for c in json.loads(row["infected"])]
+        immune = [int(c) for c in json.loads(row["immune"])]
         _var1,num_nodes = self._get_adjacency_info(row)
-        nodes_idx = [range(0,num_nodes)]
+        nodes_idx = range(0,num_nodes)
         #not_affected = [x for x in nodes_idx if x not in infected and x not in immune]
         for idx in nodes_idx:
             node_feats = []
             if idx in immune:
-                node_feats.append(0)
+               # node_feats.append(0)
+                node_feats = [1,0,0]
             elif idx in infected:
-                node_feats.append(1)
+               #node_feats.append(1)
+                node_feats =[0,1,0]
             else:
-                node_feats.append(2)
+                #node_feats.append(2)
+                node_feats =[0,0,1]
 
             # Append node features to matrix
             all_node_feats.append(node_feats)
 
-        all_node_feats = np.asarray(all_node_feats)
-        return torch.tensor(all_node_feats, dtype=torch.int)
+        #all_node_feats = np.asarray(all_node_feats)
+        return torch.tensor(all_node_feats, dtype=torch.float)
 
 
     def len(self):
-        return len(self.processed_file_names)
+       return self.data.shape[0]
 
     def get(self, idx):
-        data = torch.load(osp.join(self.processed_dir, f'data_{idx}.pt'))
+        if self.test:
+            data = torch.load(os.path.join(self.processed_dir, 
+                                 f'data_test_{idx}.pt'))
+        else:
+            data = torch.load(osp.join(self.processed_dir, f'data_{idx}.pt'))
         return data
 
 
@@ -125,3 +149,4 @@ print(dataset[0].x)
 print(dataset[0]. edge_index.t())
 print(dataset[0].y)
 print(dataset[0].days)
+print(dataset.len())
