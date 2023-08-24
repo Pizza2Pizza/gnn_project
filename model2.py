@@ -93,47 +93,37 @@ def train(data):
 
 
 def test():
-      model.eval()
+    model.eval()
 
       #converter = torch.nn.Sigmoid()  # needed for BCEWithLogits to get probability values
-      
-      total_correct = 0
-      total_nodes = 0
-      error = []
-      total_num_nodes  = 0
+    right_prediction = 0
       # Check against ground-truth labels.
-      for idx in range (0,10):
-      
+    for idx in range(len(test_dataset)):
+        
         data = test_dataset[idx]
         out,h = model(data.x, data.edge_index)
-        # Use the class with highest probability.
-        #pred = torch.round(out)
-        #print(out.size())
-        #print("prediction:")
-        # print_tensor(converter(out))
-        #print_tensor(out)
-        #print("the actual data:",data.y)
         print_output(out, data.y)
-        test_correct = np.count_nonzero(out == data.y)
-        # for was_correct in test_correct:
-        #     total_nodes += 1
-        #     if was_correct:
-        #         total_correct += 1
-        mismatches = out.size(dim = 0) - test_correct
-        total_num_nodes = total_num_nodes+out.size(dim = 0)
-        error.append(mismatches)
-        
-      # Derive ratio of correct predictions.
-      test_not_acc = sum(error) / total_num_nodes
-      test_correct = 1- test_not_acc
-      return test_correct
+        temp = []
+        probabilities = converter(out)
+        for i in range(out.size()[0]):
+            temp.append(probabilities[i,0].item() - probabilities[i,1].item())
+        p_0 = np.argmax(temp) #gives the index of the node with highest probability
+        actual_p_0 = np.argmax(data.y, axis = 0)[0]
+        if p_0 == actual_p_0.item():
+            right_prediction += 1
+    accuracy = right_prediction/len(test_dataset)
+
+
+      
+      
+    return accuracy
 
 size = len(train_dataset)
 for epoch in range(1,100):
     for idx in range(size):    
         data = train_dataset[idx]
         loss, h = train(data)
-        if epoch % 20 == 0 and idx == size-1:
+        if epoch % 50 == 0 and idx == size-1:
             visualize_embedding(h, color=[e[0] for e in data.y], epoch=epoch, loss=loss)
             time.sleep(0.3)
 
