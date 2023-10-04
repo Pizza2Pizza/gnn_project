@@ -143,10 +143,10 @@ class MyOwnDataset(Dataset):
             data = torch.load(osp.join(self.processed_dir, f'data_{idx}.pt'))
         return data
 
-
-dataset = MyOwnDataset("data/")
-print(dataset[0].x)
-print(dataset[0]. edge_index.t())
-print(dataset[0].y)
-print(dataset[0].days)
-print(dataset.len())
+if __name__ == "__main__":
+    dataset = MyOwnDataset("data/")
+    print(dataset[0].x)
+    print(dataset[0]. edge_index.t())
+    print(dataset[0].y)
+    print(dataset[0].days)
+    print(dataset.len())

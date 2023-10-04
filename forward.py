@@ -9,9 +9,21 @@ from random import sample
 
 import csv
 import json
+import sys 
 
-#open the file to read from
-file_from = open("Graph_created.txt",'r')
+type_graph = int(sys.argv[1])
+#1 means ER graph, 2 means rgg graph
+# 
+folder_name = ""
+if type_graph == 1:
+    #open the file to read from
+    file_from = open("Graph_created_er.txt",'r')
+    folder_name = "data/ER_Graph/"
+elif type_graph == 2:
+    file_from = open("Graph_created_rgg.txt",'r')
+    folder_name = "data/RGG_Graph/"
+else:
+    raise Exception("Graph is not supported")
 
 data_to_write = []
 index = 0
@@ -59,20 +71,22 @@ print("Last index:",index)
 index_test = round(index*0.8)
 #writing forwared data into csv file with format of:
 #adjacency_list,infected_list,immune_list,n_steps,patient zero
-with open('data/raw/forwarded_graph.csv', 'w', encoding='UTF8', newline='') as f:
+
+with open(folder_name +'/raw/forwarded_graph.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
 
-    writer.writerow(["adjacency list", "infected", "immune","days","patient zero"])
+    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero"])
     # write multiple rows
     writer.writerows(data_to_write[0:index_test])
 
 
-with open('data/raw/forwarded_graph_test.csv', 'w', encoding='UTF8', newline='') as f:
+with open(folder_name +'/raw/forwarded_graph_test.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
-    writer.writerow(["adjacency list", "infected", "immune","days","patient zero"])
+    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero"])
 
     # write multiple rows
     writer.writerows(data_to_write[index_test:])
+
 
 #closing file
 file_from.close()

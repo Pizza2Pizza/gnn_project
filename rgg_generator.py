@@ -5,20 +5,26 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 
-data = open("Graph_created_er.txt",'w+') 
+import random
+import math
+
+data = open("Graph_created_rgg.txt",'w+') 
 data.truncate()
 
 for i in range(100):
     n = 11  # 10 nodes
     seed = 20161  # seed random number generators for reproducibility
-
+    
     while(1):
+        radius = random.randint(0,5)
+        pos = {i: (random.uniform(0, math.sqrt(n)), random.uniform(0, math.sqrt(n))) for i in range(n)}
         # Use seed for reproducibility
-        G = nx.erdos_renyi_graph(n, 0.2)
-        if not(nx.is_connected(G)):
+        G = nx.random_geometric_graph(n, radius, pos = pos)
+        if not nx.is_connected(G):
             pass
         else:
             break
+
 
     # some properties
     print("node degree clustering")
