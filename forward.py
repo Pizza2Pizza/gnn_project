@@ -11,7 +11,7 @@ import csv
 import json
 import sys 
 
-type_graph = int(sys.argv[1])
+type_graph = int(sys.argv[1]) if len(sys.argv) >1 else 1
 #1 means ER graph, 2 means rgg graph
 # 
 folder_name = ""
@@ -22,6 +22,9 @@ if type_graph == 1:
 elif type_graph == 2:
     file_from = open("Graph_created_rgg.txt",'r')
     folder_name = "data/RGG_Graph/"
+elif type_graph ==3:
+    file_from = open("Graph_created_rt.txt",'r')
+    folder_name = "data/RandomTree_Graph/"
 else:
     raise Exception("Graph is not supported")
 
@@ -51,7 +54,7 @@ for line in file_from:
         for i in infected:
             for n in G.neighbors(i):
                 if n not in immune:
-                    roll = random.binomial(n=1, p=0.7, size=1)
+                    roll = random.binomial(n=1, p=0.3, size=1)
                     if roll == 1:
                         new_infected.append(n)
                         immune.append(n)

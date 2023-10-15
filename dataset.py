@@ -7,6 +7,8 @@ import os
 from tqdm import tqdm
 import networkx as nx
 import json
+from torchvision import transforms
+
 
 
 print(f"Torch version: {torch.__version__}")
@@ -25,6 +27,7 @@ class MyOwnDataset(Dataset):
         into raw_dir (downloaded dataset) and processed_dir (processed data). 
         """
         self.test = test
+        #self.transform = transforms.Compose([transforms.ToTensor()])
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
@@ -142,6 +145,10 @@ class MyOwnDataset(Dataset):
         else:
             data = torch.load(osp.join(self.processed_dir, f'data_{idx}.pt'))
         return data
+    
+    # def __getitem__(self, index):
+    #     #return self.dataframe.iloc[index]
+    #     return self.transform(self.x_data[index]), self.transform(self.y_data[index])
 
 if __name__ == "__main__":
     dataset = MyOwnDataset("data/")

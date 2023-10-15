@@ -12,7 +12,7 @@ data = open("Graph_created_rgg.txt",'w+')
 data.truncate()
 
 for i in range(100):
-    n = 11  # 10 nodes
+    n = 100  # 10 nodes
     seed = 20161  # seed random number generators for reproducibility
     
     while(1):
