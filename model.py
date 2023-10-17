@@ -8,9 +8,9 @@ class GCN(torch.nn.Module):
     def __init__(self):
         super().__init__()
         torch.manual_seed(1234)
-        self.conv1 = GCNConv(3, 6)
-        self.conv2 = GCNConv(6, 6)
-        self.conv3 = GCNConv(6, 2)        
+        self.conv1 = GCNConv(3, 4)
+        self.conv2 = GCNConv(4, 4)
+        self.conv3 = GCNConv(4, 2)        
         #self.conv4 = GCNConv(6, 2)
         #self.conv5 = GCNConv(4, 2)
         self.classifier = Linear(2, 2)

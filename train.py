@@ -79,10 +79,10 @@ for i in position_weight:
 position_weight1 = position_weight1[0:-1]
 
 # Define the optimizer and loss function
-lern_rate = 0.01
+lern_rate = 0.1
 criterion = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(position_weight,dtype=torch.float))  # Define loss criterion.
-optimizer = torch.optim.SGD(model.parameters(), lr=lern_rate)  # Define optimizer.
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.8)
+optimizer = torch.optim.Adam(model.parameters(), lr=lern_rate)  # Define optimizer.
+scheduler = torch.optim.lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.5, total_iters=30)
 
 
 #data = train_dataset[0]
@@ -135,6 +135,32 @@ def my_test():
 
     return accuracy
 
+def top_three_prob():
+    model.eval()
+
+      #converter = torch.nn.Sigmoid()  # needed for BCEWithLogits to get probability values
+    right_prediction = 0
+      # Check against ground-truth labels.
+    for idx in range(len(test_dataset)):
+        
+        data = test_dataset[idx]
+        out,h = model(data.x, data.edge_index)
+        #print_output(out, data.y)
+        temp = []
+        probabilities = converter(out)
+        #substract from probability "for" the probabilty "against"
+        for node_index in range(out.size()[0]):
+            temp.append(probabilities[node_index,0].item() - probabilities[node_index,1].item())
+        sorted_indices = np.argsort(temp)[::-1]
+        # Select top three nodes
+        top_three_nodes = sorted_indices[:3]#gives the index of the node with 3 highest probability
+        actual_p_0 = np.argmax(data.y, axis = 0)[0]
+        if actual_p_0.item() in top_three_nodes:
+            right_prediction += 1
+    accuracy = right_prediction/len(test_dataset)
+
+    return accuracy
+
 def test(epoch,test_loader):
     all_preds = []
     all_preds_raw = []
@@ -160,7 +186,7 @@ def test(epoch,test_loader):
     return running_loss/step
 
 size = len(train_dataset)
-epochs = 100
+epochs = 200
 # for epoch in range(epochs):    
 #     for idx in range(size):    
 #         data = train_dataset[idx]
@@ -187,7 +213,7 @@ def run_one_training(train_dataset, test_dataset):
 
 
     # Prepare training
-    BATCH_SIZE = 20
+    BATCH_SIZE = 10
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
@@ -227,6 +253,14 @@ def run_one_training(train_dataset, test_dataset):
 num_nodes = test_dataset[0].num_nodes
 days = test_dataset[0].days
 
+run_one_training(train_dataset, test_dataset)
+test_acc = my_test()
+print(f'My Test Accuracy: {test_acc:.4f}')
+
+accuracy_top_three= top_three_prob()
+print(f'Accuracy for top_3_probaility: {accuracy_top_three:.4f}')
+
+
 with mlflow.start_run():
     mlflow.set_tag("model_name", "gnn")
 
@@ -241,7 +275,7 @@ with mlflow.start_run():
     }
 
     mlflow.log_params(params)
-    mlflow.log_metric("accuracy", accuracy)
+    mlflow.log_metric("accuracy", test_acc)
    # mlflow.log_param("days", days)
     # mlflow.log_param("num_nodes", num_nodes)
    # mlflow.log_metric("weight_1", position_weight[0])
@@ -254,9 +288,7 @@ with mlflow.start_run():
 print("test1")
 
 
-run_one_training(train_dataset, test_dataset)
-test_acc = my_test()
-print(f'My Test Accuracy: {test_acc:.4f}')
+
 
 
 
