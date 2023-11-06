@@ -16,11 +16,13 @@ for i in range(100):
     seed = 20161  # seed random number generators for reproducibility
     
     while(1):
-        radius = random.randint(0,5)
+        #radius = random.randint(0,5)
+        radius = 2
         pos = {i: (random.uniform(0, math.sqrt(n)), random.uniform(0, math.sqrt(n))) for i in range(n)}
         # Use seed for reproducibility
         G = nx.random_geometric_graph(n, radius, pos = pos)
-        if not nx.is_connected(G):
+        if not nx.is_connected(G) or nx.diameter(G) < 6:
+            #or nx.diameter(G) < 6
             pass
         else:
             break
