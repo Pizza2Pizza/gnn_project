@@ -31,6 +31,11 @@ else:
 data_to_write = []
 index = 0
 
+def average_degree(G):
+    return sum(G.degree(v) for v in G.nodes) / G.number_of_nodes()
+
+sum_degree = 0
+num_Graphs = 0
 for line in file_from:
     #days = random.randint(2,10)
     days = 1
@@ -67,6 +72,10 @@ for line in file_from:
     print(immune)
     print(infected)
     index +=1
+
+    #sum over average node degree for all of the graphs
+    sum_degree = sum_degree + average_degree(G)
+    num_Graphs += 1
     
     data_to_write.append([line,json.dumps(infected),json.dumps(immune),days,patient_zero])
 
@@ -75,17 +84,25 @@ index_test = round(index*0.8)
 #writing forwared data into csv file with format of:
 #adjacency_list,infected_list,immune_list,n_steps,patient zero
 
+#average degree for all the graphs 
+all_average_degree = sum_degree/num_Graphs
+
+#append all_average_degree to data_to_write
+for row in data_to_write:
+    row.append(all_average_degree)
+
+
 with open(folder_name +'/raw/forwarded_graph.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
 
-    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero"])
+    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero","av_degree"])
     # write multiple rows
     writer.writerows(data_to_write[0:index_test])
 
 
 with open(folder_name +'/raw/forwarded_graph_test.csv', 'w', encoding='UTF8', newline='') as f:
     writer = csv.writer(f)
-    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero"])
+    writer.writerow(["adjacency_list", "infected", "immune","days","patient_zero","av_degree"])
 
     # write multiple rows
     writer.writerows(data_to_write[index_test:])

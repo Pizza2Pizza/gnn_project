@@ -187,6 +187,7 @@ def test(epoch,test_loader):
 
 size = len(train_dataset)
 epochs = 200
+BATCH_SIZE = 10
 # for epoch in range(epochs):    
 #     for idx in range(size):    
 #         data = train_dataset[idx]
@@ -213,7 +214,7 @@ def run_one_training(train_dataset, test_dataset):
 
 
     # Prepare training
-    BATCH_SIZE = 10
+    
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
@@ -271,17 +272,15 @@ with mlflow.start_run():
         "weight_1": position_weight[0],
         "weight_2": position_weight[1],
         "graph_type": graph_type,
-        "activ_funcntion": activation
+        "activ_funcntion": activation,
+        "epochs": epochs,
+        "batch_size": BATCH_SIZE
     }
 
     mlflow.log_params(params)
     mlflow.log_metric("accuracy", test_acc)
-   # mlflow.log_param("days", days)
-    # mlflow.log_param("num_nodes", num_nodes)
-   # mlflow.log_metric("weight_1", position_weight[0])
-   # mlflow.log_metric("weight_2", position_weight[1])
-   # mlflow.log_metric("learning rate", lern_rate)
-    #mlflow.log_metric("graph_type", graph_type)
+    mlflow.log_metric("top_3_acc", accuracy_top_three)
+
 
     mlflow.pytorch.log_model(model,"gnn")
     print("test1")
