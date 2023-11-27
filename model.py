@@ -3,23 +3,32 @@ import torch
 from torch.nn import Linear
 from torch_geometric.nn import GCNConv
 
+WHATEVER = 120 # 120
+HIDDEN_DIMENSIONS = 15 # 15
+HIDDEN_LAYERS = 2 # 2
 
 class GCN(torch.nn.Module):
     def __init__(self):
         super().__init__()
         torch.manual_seed(1234)
-        self.conv1 = GCNConv(3, 4)
-        self.conv2 = GCNConv(4, 4)
-        self.conv3 = GCNConv(4, 2)        
+
+        self.conv1 = GCNConv(3, HIDDEN_DIMENSIONS)
+
+        self.hidden_layers = [GCNConv(HIDDEN_DIMENSIONS, HIDDEN_DIMENSIONS) for _i in range(0,HIDDEN_LAYERS)]
+
+        self.conv3 = GCNConv(HIDDEN_DIMENSIONS, WHATEVER)        
         #self.conv4 = GCNConv(6, 2)
         #self.conv5 = GCNConv(4, 2)
-        self.classifier = Linear(2, 2)
+        self.classifier = Linear(WHATEVER, 2)
 
     def forward(self, x, edge_index):
         h = self.conv1(x, edge_index)
         h = h.tanh() #TODO: change to see what happens
-        h = self.conv2(h, edge_index)
-        h = h.tanh()
+
+        for l in self.hidden_layers:
+            h = l(h, edge_index)
+            h = h.tanh()
+
         h = self.conv3(h, edge_index)
         h = h.tanh()  # Final GNN embedding space.
 

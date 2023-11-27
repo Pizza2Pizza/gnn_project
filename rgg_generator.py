@@ -12,12 +12,12 @@ data = open("Graph_created_rgg.txt",'w+')
 data.truncate()
 
 for i in range(100):
-    n = 100  # 10 nodes
+    n = 1000  # 10 nodes
     seed = 20161  # seed random number generators for reproducibility
     
     while(1):
         #radius = random.randint(0,5)
-        radius = 2
+        radius = 1.969
         pos = {i: (random.uniform(0, math.sqrt(n)), random.uniform(0, math.sqrt(n))) for i in range(n)}
         # Use seed for reproducibility
         G = nx.random_geometric_graph(n, radius, pos = pos)
@@ -29,14 +29,14 @@ for i in range(100):
 
 
     # some properties
-    print("node degree clustering")
-    for v in nx.nodes(G):
-        print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
+    # print("node degree clustering")
+    # for v in nx.nodes(G):
+    #     print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
 
-    print()
-    print("the adjacency list")
-    for line in nx.generate_adjlist(G):
-        print(line)
+    # print()
+    # print("the adjacency list")
+    # for line in nx.generate_adjlist(G):
+    #     print(line)
 
     pos = nx.spring_layout(G, seed=seed)  # Seed for reproducible layout
     nx.draw(G, pos=pos,with_labels=True)
@@ -51,5 +51,6 @@ for i in range(100):
     
     data.write(json.dumps(d))
     data.write("\n")
+    print("Printing graph: ", i)
 
 data.close()

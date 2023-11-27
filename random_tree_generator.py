@@ -9,7 +9,7 @@ data = open("Graph_created_rt.txt",'w')
 data.truncate()
 
 for i in range(100):
-    n = 100  # number of nodes
+    n = 1000  # number of nodes
     #seed = 20161  # seed random number generators for reproducibility
 
 
@@ -18,14 +18,14 @@ for i in range(100):
 
 
     # some properties
-    print("node degree clustering")
-    for v in nx.nodes(G):
-        print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
+    #print("node degree clustering")
+    #for v in nx.nodes(G):
+    #    print(f"{v} {nx.degree(G, v)} {nx.clustering(G, v)}")
 
-    print()
-    print("the adjacency list")
-    for line in nx.generate_adjlist(G):
-        print(line)
+    
+    #print("the adjacency list")
+    #for line in nx.generate_adjlist(G):
+    #    print(line)
 
     pos = nx.spring_layout(G, seed=None)  # Seed for reproducible layout
     nx.draw(G, pos=pos,with_labels=True)
@@ -40,5 +40,6 @@ for i in range(100):
     
     data.write(json.dumps(d))
     data.write("\n")
+    print("Printing graph: ", i)
 
 data.close()

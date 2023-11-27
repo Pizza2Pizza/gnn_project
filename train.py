@@ -4,6 +4,7 @@ import numpy as np
 import mlflow
 import mlflow.sklearn
 import sys
+import csv
 from tqdm import tqdm
 from model import GCN
 #from model2 import GCNNet
@@ -12,7 +13,9 @@ display(Javascript('''google.colab.output.setIframeHeight(0, true, {maxHeight: 4
 from sklearn.metrics import confusion_matrix, f1_score, \
     accuracy_score, precision_score, recall_score, roc_auc_score
 from torch_geometric.data import DataLoader
-from config import setup
+
+
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -68,8 +71,7 @@ def count_parameters(model):
 # Loading the model
 print("Loading model...")
 model = GCN()
-# setup["net_params"]["device"] = device
-# model = GCNNet(setup["net_params"])
+
 model = model.to(device)
 print(model)
 print(f"Number of parameters: {count_parameters(model)}")
@@ -205,11 +207,12 @@ BATCH_SIZE = 10
 def calculate_metrics(y_pred, y_true, epoch, type):
     global accuracy
     accuracy = accuracy_score(y_true, y_pred)
-    print(f"Accuracy: {accuracy_score(y_true, y_pred)}")
     prec = precision_score(y_true, y_pred)
     rec = recall_score(y_true, y_pred)
-    print(f"Precision: {prec}")
-    print(f"Recall: {rec}")
+    if epoch == epochs:
+        print(f"Accuracy: {accuracy_score(y_true, y_pred)}")
+        print(f"Precision: {prec}")
+        print(f"Recall: {rec}")
 
 
 def run_one_training(train_dataset, test_dataset):
@@ -254,9 +257,12 @@ def run_one_training(train_dataset, test_dataset):
     print(f"Finishing training with best test loss: {best_loss}")
     return [best_loss]
 
-
+#load the parameters
 num_nodes = test_dataset[0].num_nodes
 days = test_dataset[0].days
+aver_node_degree = test_dataset[0].aver_node_degree
+inf_rate =  test_dataset[0].inf_rate
+
 
 run_one_training(train_dataset, test_dataset)
 test_acc = my_test()
@@ -264,6 +270,7 @@ print(f'My Test Accuracy: {test_acc:.4f}')
 
 accuracy_top_three= top_three_prob()
 print(f'Accuracy for top_3_probaility: {accuracy_top_three:.4f}')
+
 
 
 with mlflow.start_run():
@@ -278,7 +285,9 @@ with mlflow.start_run():
         "graph_type": graph_type,
         "activ_funcntion": activation,
         "epochs": epochs,
-        "batch_size": BATCH_SIZE
+        "batch_size": BATCH_SIZE,
+        "av_node_degree": aver_node_degree,
+        "inf_rate": inf_rate
     }
 
     mlflow.log_params(params)

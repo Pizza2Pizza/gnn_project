@@ -74,7 +74,9 @@ class MyOwnDataset(Dataset):
                         edge_index=edge_indices,
                         y=label,
                         days = row["days"],
-                        num_nodes = num_nodes
+                        num_nodes = num_nodes,
+                        aver_node_degree = row["av_degree"],
+                        inf_rate = row["inf_chance"]
                         ) 
             if self.test:
                 torch.save(data, 
