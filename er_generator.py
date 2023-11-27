@@ -15,7 +15,7 @@ for i in range(100):
     while(1):
         # Use seed for reproducibility
         G = nx.erdos_renyi_graph(n, 0.2)
-        if not(nx.is_connected(G)):
+        if not(nx.is_connected(G)) or nx.diameter(G) < 6:
             pass
         else:
             break

@@ -6,11 +6,13 @@ import mlflow.sklearn
 import sys
 from tqdm import tqdm
 from model import GCN
+#from model2 import GCNNet
 from IPython.display import Javascript,display  # Restrict height of output cell.
 display(Javascript('''google.colab.output.setIframeHeight(0, true, {maxHeight: 430})'''))
 from sklearn.metrics import confusion_matrix, f1_score, \
     accuracy_score, precision_score, recall_score, roc_auc_score
 from torch_geometric.data import DataLoader
+from config import setup
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -66,6 +68,8 @@ def count_parameters(model):
 # Loading the model
 print("Loading model...")
 model = GCN()
+# setup["net_params"]["device"] = device
+# model = GCNNet(setup["net_params"])
 model = model.to(device)
 print(model)
 print(f"Number of parameters: {count_parameters(model)}")
